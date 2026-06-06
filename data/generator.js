@@ -41,8 +41,8 @@ function getRandomSubset(arr, size) {
   return shuffled.slice(0, size);
 }
 
-function generateCustomer(id, isMatchPool = false) {
-  const gender = Math.random() > 0.5 ? 'Male' : 'Female';
+function generateCustomer(id, forcedGender = null) {
+  const gender = forcedGender || (Math.random() > 0.5 ? 'Male' : 'Female');
   const firstName = gender === 'Male' ? getRandom(firstNamesMale) : getRandom(firstNamesFemale);
   const lastName = getRandom(lastNames);
   const age = Math.floor(Math.random() * (45 - 22 + 1)) + 22;
@@ -121,12 +121,19 @@ function generateCustomer(id, isMatchPool = false) {
   };
 }
 
-const activeCustomers = Array.from({ length: 20 }, (_, i) => generateCustomer(`CUST-${i + 1}`));
-const matchPool = Array.from({ length: 100 }, (_, i) => generateCustomer(`POOL-${i + 1}`, true));
-
-/* eslint-disable @typescript-eslint/no-require-imports */
+// 1. Load existing data
 const fs = require('fs');
 const path = require('path');
 const dataPath = path.join(__dirname, 'mock_data.json');
-fs.writeFileSync(dataPath, JSON.stringify({ activeCustomers, matchPool }, null, 2), 'utf8');
-console.log(`Successfully generated ${dataPath}`);
+const existingData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+
+// 2. Add 58 females and 42 males to the pool
+const currentPoolCount = existingData.matchPool.length;
+const newFemales = Array.from({ length: 58 }, (_, i) => generateCustomer(`POOL-${currentPoolCount + i + 1}`, 'Female'));
+const newMales = Array.from({ length: 42 }, (_, i) => generateCustomer(`POOL-${currentPoolCount + 58 + i + 1}`, 'Male'));
+
+// 3. Combine and save
+existingData.matchPool = [...existingData.matchPool, ...newFemales, ...newMales];
+
+fs.writeFileSync(dataPath, JSON.stringify(existingData, null, 2), 'utf8');
+console.log(`Successfully updated ${dataPath}. Total pool: ${existingData.matchPool.length}`);

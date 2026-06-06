@@ -50,9 +50,7 @@ export default function DashboardPage() {
   const [ageFilter, setAgeFilter] = useState("all")
   const [maritalStatusFilter, setMaritalStatusFilter] = useState("all")
 
-  const customers = useMemo(() => {
-    return [...mockData.activeCustomers, ...mockData.matchPool] as Customer[]
-  }, [])
+  const customers = mockData.activeCustomers as Customer[]
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(customer => {
