@@ -18,6 +18,14 @@ import {
   ShieldCheck,
   User,
   History,
+  Clock,
+  Home,
+  Users,
+  Moon,
+  Star,
+  Zap,
+  Info,
+  Droplets,
   LucideIcon
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -35,7 +43,8 @@ export default function CustomerDetailPage() {
   const customerId = params.id as string
 
   const customer = useMemo(() => {
-    return (mockData.activeCustomers as Customer[]).find(c => c.id === customerId)
+    const allProfiles = [...mockData.activeCustomers, ...mockData.matchPool] as Customer[];
+    return allProfiles.find(c => c.id === customerId)
   }, [customerId])
 
   if (!customer) {
@@ -74,6 +83,17 @@ export default function CustomerDetailPage() {
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-3xl font-bold text-slate-900">{customer.firstName} {customer.lastName}</h1>
+              <Badge 
+                variant="outline" 
+                className={cn(
+                  "font-bold",
+                  customer.membershipTier === 'Premium' 
+                    ? "bg-amber-50 text-amber-700 border-amber-200" 
+                    : "bg-slate-50 text-slate-600 border-slate-200"
+                )}
+              >
+                {customer.membershipTier} Tier
+              </Badge>
               {customer.profileVerified && (
                 <Badge className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-50 flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
@@ -82,7 +102,11 @@ export default function CustomerDetailPage() {
               )}
               <Badge variant="outline" className={cn(
                 "font-medium",
-                customer.status === 'Active' ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-600"
+                customer.status === 'Successfully Matched' ? "bg-emerald-50 text-emerald-700 border-emerald-200" : 
+                customer.status === 'Active Search' ? "bg-blue-50 text-blue-700 border-blue-200" : 
+                customer.status === 'Verification Pending' ? "bg-amber-50 text-amber-700 border-amber-200" : 
+                customer.status === 'On Hold' ? "bg-red-50 text-red-700 border-red-200" :
+                "bg-slate-50 text-slate-600 border-slate-200"
               )}>
                 {customer.status}
               </Badge>
@@ -117,16 +141,22 @@ export default function CustomerDetailPage() {
                 Personal Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <InfoItem label="Full Name" value={`${customer.firstName} ${customer.lastName}`} />
               <InfoItem label="Gender" value={customer.gender} />
               <InfoItem label="Date of Birth" value={customer.dateOfBirth} />
+              <InfoItem label="Time of Birth" value={customer.timeOfBirth || 'N/A'} icon={Clock} />
+              <InfoItem label="Place of Birth" value={customer.placeOfBirth || 'N/A'} icon={MapPin} />
               <InfoItem label="Age" value={`${customer.age} Years`} />
               <InfoItem label="Height" value={customer.height} />
+              <InfoItem label="Weight" value={customer.weight || 'N/A'} />
+              <InfoItem label="Blood Group" value={customer.bloodGroup || 'N/A'} icon={Droplets} />
+              <InfoItem label="Complexion" value={customer.complexion || 'N/A'} />
               <InfoItem label="Marital Status" value={customer.maritalStatus} />
               <InfoItem label="Religion" value={customer.religion} />
               <InfoItem label="Caste" value={customer.caste} />
-              <div className="md:col-span-2">
+              <InfoItem label="Subcaste" value={customer.subcaste || 'None'} />
+              <div className="md:col-span-2 lg:col-span-3">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Languages Known</p>
                 <div className="flex flex-wrap gap-2">
                   {customer.languages.map(lang => (
@@ -137,7 +167,48 @@ export default function CustomerDetailPage() {
             </CardContent>
           </Card>
 
-          {/* 3. Career & Education */}
+          {/* 3. Horoscope & Astrological Details */}
+          <Card className="border-slate-200 shadow-sm rounded-xl">
+            <CardHeader className="border-b border-slate-50">
+              <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Star className="w-5 h-5 text-blue-600" />
+                Astrological Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <InfoItem label="Rashi" value={customer.rashi || 'N/A'} icon={Moon} />
+              <InfoItem label="Nakshatra" value={customer.nakshatra || 'N/A'} icon={Star} />
+              <InfoItem label="Manglik Status" value={customer.manglik ? 'Yes' : 'No'} icon={Zap} />
+              <div className="md:col-span-2 lg:col-span-3">
+                <InfoItem label="Horoscope Details" value={customer.horoscopeDetails || 'N/A'} icon={Info} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 4. Family Background */}
+          <Card className="border-slate-200 shadow-sm rounded-xl">
+            <CardHeader className="border-b border-slate-50">
+              <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Home className="w-5 h-5 text-blue-600" />
+                Family Background
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InfoItem label="Father's Name" value={customer.fatherName || 'N/A'} />
+              <InfoItem label="Father's Occupation" value={customer.fatherOccupation || 'N/A'} />
+              <InfoItem label="Mother's Name" value={customer.motherName || 'N/A'} />
+              <InfoItem label="Mother's Occupation" value={customer.motherOccupation || 'N/A'} />
+              <InfoItem label="Family Type" value={customer.familyType || 'N/A'} icon={Users} />
+              <InfoItem label="Native Place" value={customer.nativePlace || 'N/A'} icon={MapPin} />
+              <InfoItem label="Brothers" value={`${customer.totalBrothers || 0} (${customer.marriedBrothers || 0} Married)`} />
+              <InfoItem label="Sisters" value={`${customer.totalSisters || 0} (${customer.marriedSisters || 0} Married)`} />
+              <div className="md:col-span-2">
+                <InfoItem label="Relatives Information" value={customer.relativesInfo || 'N/A'} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 5. Career & Education */}
           <Card className="border-slate-200 shadow-sm rounded-xl">
             <CardHeader className="border-b border-slate-50">
               <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -156,51 +227,66 @@ export default function CustomerDetailPage() {
             </CardContent>
           </Card>
 
-          {/* 4. Lifestyle & Preferences */}
+          {/* 6. Lifestyle & Preferences */}
           <Card className="border-slate-200 shadow-sm rounded-xl">
             <CardHeader className="border-b border-slate-50">
               <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Heart className="w-5 h-5 text-blue-600" />
-                Lifestyle & Preferences
+                Lifestyle & Expectations
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-6">
-              <PreferenceItem 
-                icon={Baby} 
-                label="Want Kids" 
-                value={customer.wantKids ? "Yes" : "No"} 
-                color={customer.wantKids ? "text-emerald-600" : "text-slate-500"} 
-              />
-              <PreferenceItem 
-                icon={Plane} 
-                label="Open to Relocate" 
-                value={customer.openToRelocate ? "Yes" : "No"} 
-                color={customer.openToRelocate ? "text-emerald-600" : "text-slate-500"} 
-              />
-              <PreferenceItem 
-                icon={PawPrint} 
-                label="Open to Pets" 
-                value={customer.openToPets ? "Yes" : "No"} 
-                color={customer.openToPets ? "text-emerald-600" : "text-slate-500"} 
-              />
-              <div className="md:col-span-2">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Hobbies & Interests</p>
-                <div className="flex flex-wrap gap-2">
-                  {customer.hobbies.map(hobby => (
-                    <Badge key={hobby} className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 transition-colors">
-                      {hobby}
-                    </Badge>
-                  ))}
-                </div>
+            <CardContent className="pt-6 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <PreferenceItem 
+                  icon={Baby} 
+                  label="Want Kids" 
+                  value={customer.wantKids ? "Yes" : "No"} 
+                  color={customer.wantKids ? "text-emerald-600" : "text-slate-500"} 
+                />
+                <PreferenceItem 
+                  icon={Plane} 
+                  label="Open to Relocate" 
+                  value={customer.openToRelocate ? "Yes" : "No"} 
+                  color={customer.openToRelocate ? "text-emerald-600" : "text-slate-500"} 
+                />
+                <PreferenceItem 
+                  icon={PawPrint} 
+                  label="Open to Pets" 
+                  value={customer.openToPets ? "Yes" : "No"} 
+                  color={customer.openToPets ? "text-emerald-600" : "text-slate-500"} 
+                />
               </div>
-              <div className="md:col-span-2">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Personality Traits</p>
-                <div className="flex flex-wrap gap-2">
-                  {customer.personalityTraits.map(trait => (
-                    <Badge key={trait} variant="outline" className="border-slate-200 text-slate-600">
-                      {trait}
-                    </Badge>
-                  ))}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <InfoItem label="Diet" value={customer.diet || 'N/A'} />
+                <InfoItem label="Smoking" value={customer.smoking || 'Non-Smoker'} />
+                <InfoItem label="Drinking" value={customer.drinking || 'Non-Drinker'} />
+              </div>
+
+              <div className="space-y-4">
+                <InfoItem label="What I am looking for" value={customer.partnerExpectations || 'N/A'} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Hobbies & Interests</p>
+                  <div className="flex flex-wrap gap-2">
+                    {customer.hobbies.map(hobby => (
+                      <Badge key={hobby} className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 transition-colors">
+                        {hobby}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Personality Traits</p>
+                  <div className="flex flex-wrap gap-2">
+                    {customer.personalityTraits.map(trait => (
+                      <Badge key={trait} variant="outline" className="border-slate-200 text-slate-600">
+                        {trait}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
             </CardContent>

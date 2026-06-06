@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react"
 import { 
-  Sparkles, 
-  Brain,
-  Info
+  Sparkles as SparklesIcon, 
+  Brain as BrainIcon,
+  Info as InfoIcon
 } from "lucide-react"
 import { Customer } from "@/types"
 import { getTopMatches } from "@/lib/matching"
@@ -27,7 +27,8 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
   const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({})
 
   const recommendations = useMemo(() => {
-    return getTopMatches(customer, mockData.activeCustomers as Customer[])
+    const allProfiles = [...mockData.activeCustomers, ...mockData.matchPool] as Customer[];
+    return getTopMatches(customer, allProfiles)
   }, [customer])
 
   const fetchAIAnalysis = async (match: Customer, score: number) => {
@@ -75,13 +76,13 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-600" />
+            <SparklesIcon className="w-5 h-5 text-blue-600" />
             AI Match Suggestions
           </h2>
           <p className="text-sm text-slate-500 font-medium">Top 10 ranked profiles for {customer.firstName}</p>
         </div>
         <div className="hidden md:flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
-          <Brain className="w-4 h-4 text-blue-600" />
+          <BrainIcon className="w-4 h-4 text-blue-600" />
           <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">AI Powered Engine</span>
         </div>
       </div>
@@ -91,9 +92,8 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
           <MatchSuggestionCard 
             key={match.id}
             profile={match}
-            matchScore={match.matchDetails.score}
+            matchDetails={match.matchDetails}
             matchLabel={getMatchLabel(match.matchDetails.score)}
-            matchReasons={match.matchDetails.reasons}
             aiExplanation={aiAnalysis[match.id]?.matchSummary || null}
             isAILoading={loadingAI[match.id]}
             onSendMatch={(profile) => handleSendMatch(profile.firstName)}
@@ -107,7 +107,7 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
 
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex gap-4 items-start shadow-sm">
         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
-          <Info className="w-5 h-5 text-slate-400" />
+          <InfoIcon className="w-5 h-5 text-slate-400" />
         </div>
         <div className="text-xs text-slate-500 leading-relaxed">
           <p className="font-bold text-slate-900 text-sm mb-1">Matchmaker Decision Support</p>

@@ -7,18 +7,24 @@ import {
   Calendar, 
   Send, 
   Brain, 
-  Sparkles
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Users,
+  Heart,
+  Globe as GlobeIcon
 } from "lucide-react"
 import { Customer } from "@/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { CompatibilityResult } from "@/lib/matching"
 
 interface MatchSuggestionCardProps {
   profile: Customer
-  matchScore: number
+  matchDetails: CompatibilityResult
   matchLabel: string
-  matchReasons: string[]
   aiExplanation: string | null
   isAILoading?: boolean
   onSendMatch: (profile: Customer) => void
@@ -28,9 +34,8 @@ interface MatchSuggestionCardProps {
 
 export function MatchSuggestionCard({
   profile,
-  matchScore,
+  matchDetails,
   matchLabel,
-  matchReasons,
   aiExplanation,
   isAILoading,
   onSendMatch,
@@ -38,7 +43,15 @@ export function MatchSuggestionCard({
   onViewAIInsight
 }: MatchSuggestionCardProps) {
   const [showAIInsight, setShowAIInsight] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
+
+  if (!matchDetails) {
+    return null;
+  }
+
+  const matchScore = matchDetails.score;
+  const matchReasons = matchDetails.strengths || [];
 
   // Close popover on outside click
   useEffect(() => {
@@ -75,10 +88,14 @@ export function MatchSuggestionCard({
     if (r.includes("same country")) return "Same Country"
     if (r.includes("educational") || r.includes("academic") || r.includes("higher education")) return "Similar Education"
     if (r.includes("family")) return "Family Aligned"
-    if (r.includes("relocation") || r.includes("relocating")) return "Relocatable"
+    if (r.includes("relocation") || r.includes("relocating") || r.includes("flexible with location")) return "Relocatable"
     if (r.includes("languages")) return "Common Language"
-    if (r.includes("interests") || r.includes("personality") || r.includes("pets")) return "Compatible Lifestyle"
-    if (r.includes("professional") || r.includes("roles") || r.includes("organization")) return "Career Aligned"
+    if (r.includes("interests") || r.includes("traits")) return "Compatible Traits"
+    if (r.includes("manglik")) return "Manglik Match"
+    if (r.includes("zodiac") || r.includes("rashi")) return "Zodiac Match"
+    if (r.includes("dietary") || r.includes("diet")) return "Same Diet"
+    if (r.includes("smoking")) return "Same Habits"
+    if (r.includes("perfect cultural match")) return "Cultural Match"
     return reason // fallback
   }
 
@@ -150,7 +167,69 @@ export function MatchSuggestionCard({
         </div>
       </div>
 
-      {/* Row 2: Actions */}
+      {/* Row 2: Score Breakdown (Expandable) */}
+      <div className="mt-4 pt-4 border-t border-slate-50">
+        <button 
+          onClick={() => setShowBreakdown(!showBreakdown)}
+          className="flex items-center gap-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
+        >
+          {showBreakdown ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          Match Breakdown
+        </button>
+
+        {showBreakdown && (
+          <div className="mt-3 grid grid-cols-2 md:grid-cols-5 gap-4 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Info className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">Goals</span>
+              </div>
+              <div className="text-[14px] font-bold text-slate-900">{matchDetails.futureGoals} pts</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Heart className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">Lifestyle</span>
+              </div>
+              <div className="text-[14px] font-bold text-slate-900">{matchDetails.lifestyle} pts</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Users className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">Family</span>
+              </div>
+              <div className="text-[14px] font-bold text-slate-900">{matchDetails.family} pts</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Briefcase className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">Career</span>
+              </div>
+              <div className="text-[14px] font-bold text-slate-900">{matchDetails.career} pts</div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <GlobeIcon className="w-3 h-3" />
+                <span className="text-[10px] font-bold uppercase tracking-tight">Location</span>
+              </div>
+              <div className="text-[14px] font-bold text-slate-900">{matchDetails.location} pts</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Row 3: Concerns (if any) */}
+      {matchDetails.concerns.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {matchDetails.concerns.map((concern, idx) => (
+            <div key={idx} className="flex items-center gap-1 text-[11px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+              <span className="font-bold">!</span> {concern}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Row 4: Actions */}
       <div className="flex justify-end items-center gap-[8px] mt-[12px] relative">
         <Button 
           variant="outline" 

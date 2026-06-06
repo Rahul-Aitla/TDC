@@ -64,10 +64,11 @@ export async function POST(req: Request) {
     const data = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(text);
 
     return NextResponse.json(data);
-  } catch (error: any) {
-    console.error("Gemini API Error Details:", error.message || error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to analyze match";
+    console.error("Gemini API Error Details:", errorMessage);
     return NextResponse.json(
-      { error: error.message || "Failed to analyze match" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
