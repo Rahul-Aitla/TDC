@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "framework": "nextjs",
+  "regions": ["sin1"],
+  "env": {
+    "GEMINI_API_KEY": "@gemini_api_key"
+  }
+}

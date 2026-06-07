@@ -14,11 +14,11 @@ import {
   Heart,
   Globe as GlobeIcon
 } from "lucide-react"
-import { Customer } from "@/types"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { CompatibilityResult } from "@/lib/matching"
+import { Customer } from "../../../types"
+import { Badge } from "../../../components/ui/badge"
+import { Button } from "../../../components/ui/button"
+import { cn } from "../../../lib/utils"
+import { CompatibilityResult } from "../lib/matching"
 import { AIMatchAnalysis } from "./MatchingRecommendations"
 import { MatchAnalysisModal } from "./MatchAnalysisModal"
 
@@ -71,22 +71,24 @@ export function MatchSuggestionCard({
 
   const getShortLabel = (reason: string) => {
     const r = reason.toLowerCase()
-    if (r.includes("children") || r.includes("child-free")) return "Want Kids"
+    if (r.includes("child-free")) return "Child-free"
+    if (r.includes("want children") || r.includes("want kids")) return "Want Kids"
     if (r.includes("religious") || r.includes("religion")) return "Same Religion"
     if (r.includes("both based in")) return "Same City"
     if (r.includes("same country")) return "Same Country"
-    if (r.includes("educational") || r.includes("academic") || r.includes("higher education")) return "Similar Education"
-    if (r.includes("family")) return "Family Aligned"
+    if (r.includes("educational") || r.includes("academic") || r.includes("higher education") || r.includes("matching educational")) return "Similar Education"
+    if (r.includes("family structure") || r.includes("family oriented")) return "Family Aligned"
     if (r.includes("relocation") || r.includes("relocating") || r.includes("flexible with location")) return "Relocatable"
     if (r.includes("languages")) return "Common Language"
-    if (r.includes("interests") || r.includes("traits")) return "Compatible Traits"
+    if (r.includes("interests") || r.includes("traits") || r.includes("shared values")) return "Compatible"
     if (r.includes("manglik")) return "Manglik Match"
     if (r.includes("zodiac") || r.includes("rashi")) return "Zodiac Match"
     if (r.includes("dietary") || r.includes("diet")) return "Same Diet"
-    if (r.includes("smoking")) return "Same Habits"
+    if (r.includes("smoking") || r.includes("habits") || r.includes("lifestyle")) return "Lifestyle Match"
     if (r.includes("perfect cultural match")) return "Cultural Match"
     if (r.includes("age preference")) return "Age Match"
     if (r.includes("height preference")) return "Height Match"
+    if (r.includes("income level")) return "Income Match"
     return reason // fallback
   }
 
@@ -100,7 +102,7 @@ export function MatchSuggestionCard({
         {/* Section A: Avatar + Score */}
         <div className="w-[70px] shrink-0 flex flex-col items-center gap-[4px]">
           <div className="w-[40px] h-[40px] rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-[14px] border border-slate-200">
-            {profile.firstName[0]}{profile.lastName[0]}
+            {(profile.firstName?.[0] || '').toUpperCase()}{(profile.lastName?.[0] || '').toUpperCase()}
           </div>
           <div className={cn(
             "px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm",
@@ -137,7 +139,7 @@ export function MatchSuggestionCard({
         {/* Section C: Tags */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap gap-[6px]">
-            {(showBreakdown ? matchReasons : matchReasons.slice(0, 3)).map((reason, idx) => (
+            {(showBreakdown ? matchReasons : matchReasons.slice(0, 3)).map((reason: string, idx: number) => (
               <Badge 
                 key={idx} 
                 variant="outline" 
@@ -212,7 +214,7 @@ export function MatchSuggestionCard({
       {/* Row 3: Concerns (if any) */}
       {matchDetails.concerns.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {matchDetails.concerns.map((concern, idx) => (
+          {matchDetails.concerns.map((concern: string, idx: number) => (
             <div key={idx} className="flex items-center gap-1 text-[11px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
               <span className="font-bold">!</span> {concern}
             </div>

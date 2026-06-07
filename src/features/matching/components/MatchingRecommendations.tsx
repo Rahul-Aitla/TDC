@@ -7,13 +7,13 @@ import {
   Info as InfoIcon,
   ChevronDown
 } from "lucide-react"
-import { Customer } from "@/types"
-import { getTopMatches, CompatibilityResult } from "@/lib/matching"
+import { Customer } from "../../../types"
+import { getTopMatches, CompatibilityResult } from "../lib/matching"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "../../../components/ui/button"
 import { MatchSuggestionCard } from "./MatchSuggestionCard"
-import { EmailPreviewModal } from "./EmailPreviewModal"
-import mockData from "@/data/mock_data.json"
+import { EmailPreviewModal } from "../../interaction/email/EmailPreviewModal"
+import mockData from "../../../constants/mock_data.json"
 
 interface MatchingRecommendationsProps {
   customer: Customer
@@ -119,7 +119,7 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {visibleRecommendations.map((match) => (
+        {visibleRecommendations.map((match: Customer & { matchDetails: CompatibilityResult }) => (
           <MatchSuggestionCard 
             key={match.id}
             profile={match}
@@ -127,8 +127,8 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
             matchLabel={getMatchLabel(match.matchDetails.score)}
             aiAnalysis={aiAnalysis[match.id] || null}
             isAILoading={loadingAI[match.id]}
-            onSendMatch={(profile, emailContent) => handleSendMatch(profile, emailContent)}
-            onViewProfile={(profile) => {
+            onSendMatch={(profile: Customer, emailContent?: { subject: string, body: string }) => handleSendMatch(profile, emailContent)}
+            onViewProfile={(profile: Customer) => {
               window.location.href = `/customer/${profile.id}`
             }}
             onViewAIInsight={() => fetchAIAnalysis(match)}

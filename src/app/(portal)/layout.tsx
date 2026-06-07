@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Sidebar } from "@/components/Layout/Sidebar"
-import { Header } from "@/components/Layout/Header"
+import { Sidebar } from "@/components/shared/Layout/Sidebar"
+import { Header } from "@/components/shared/Layout/Header"
 import { Loader2 } from "lucide-react"
 
 export default function PortalLayout({

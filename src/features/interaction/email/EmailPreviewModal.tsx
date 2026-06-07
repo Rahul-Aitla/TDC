@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { X, Send, User, Mail, Type, AlignLeft } from "lucide-react"
-import { Customer } from "@/types"
-import { Button } from "@/components/ui/button"
+import { Customer } from "../../../types"
+import { Button } from "../../../components/ui/button"
 import { toast } from "sonner"
 
 interface EmailPreviewModalProps {

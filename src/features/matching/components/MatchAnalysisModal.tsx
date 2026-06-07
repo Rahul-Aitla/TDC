@@ -10,11 +10,11 @@ import {
   AlertCircle,
   MessageSquare
 } from "lucide-react"
-import { Customer } from "@/types"
-import { CompatibilityResult } from "@/lib/matching"
+import { Customer } from "../../../types"
+import { CompatibilityResult } from "../lib/matching"
 import { AIMatchAnalysis } from "./MatchingRecommendations"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "../../../components/ui/button"
+import { Badge } from "../../../components/ui/badge"
 import { toast } from "sonner"
 
 interface MatchAnalysisModalProps {
@@ -126,7 +126,7 @@ export function MatchAnalysisModal({
                 <section className="space-y-4">
                   <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">Expectation Alignment</h3>
                   <div className="space-y-3">
-                    {(aiAnalysis.expectationAlignment || []).map((insight, i) => (
+                    {(aiAnalysis.expectationAlignment || []).map((insight: string, i: number) => (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-blue-50/50 border border-blue-100/50">
                         <CheckCircle2 className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                         <span className="text-sm text-slate-700 leading-snug">{insight}</span>
@@ -139,7 +139,7 @@ export function MatchAnalysisModal({
                 <section className="space-y-4">
                   <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">Key Strengths</h3>
                   <div className="space-y-3">
-                    {(aiAnalysis.keyStrengths || []).map((strength, i) => (
+                    {(aiAnalysis.keyStrengths || []).map((strength: string, i: number) => (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-emerald-50/50 border border-emerald-100/50">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                         <span className="text-sm text-slate-700 leading-snug">{strength}</span>
@@ -156,7 +156,7 @@ export function MatchAnalysisModal({
                   <section className="space-y-4">
                     <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">Potential Concerns</h3>
                     <div className="space-y-3">
-                      {aiAnalysis.potentialConcerns.map((concern, i) => (
+                      {aiAnalysis.potentialConcerns.map((concern: string, i: number) => (
                         <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-amber-50/50 border border-amber-100/50">
                           <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                           <span className="text-sm text-slate-700 leading-snug">{concern}</span>
@@ -170,7 +170,7 @@ export function MatchAnalysisModal({
                 <section className="space-y-4">
                   <h3 className="text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">Suggested Discussion</h3>
                   <div className="space-y-3">
-                    {(aiAnalysis.firstConversationTopics || []).map((topic, i) => (
+                    {(aiAnalysis.firstConversationTopics || []).map((topic: string, i: number) => (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
                         <MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                         <span className="text-sm text-slate-700 leading-snug">{topic}</span>

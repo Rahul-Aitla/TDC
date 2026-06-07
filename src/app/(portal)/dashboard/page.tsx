@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import mockData from "@/data/mock_data.json"
+import mockData from "@/constants/mock_data.json"
 import { Customer } from "@/types"
 
 interface StatCardProps {
