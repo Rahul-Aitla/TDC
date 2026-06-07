@@ -67,10 +67,6 @@ export default function CustomerDetailPage() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Link>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm">Edit Profile</Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Send Match</Button>
-        </div>
       </div>
 
       {/* 1. Profile Header */}

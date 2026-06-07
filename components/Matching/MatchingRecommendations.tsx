@@ -4,46 +4,70 @@ import { useMemo, useState } from "react"
 import { 
   Sparkles as SparklesIcon, 
   Brain as BrainIcon,
-  Info as InfoIcon
+  Info as InfoIcon,
+  ChevronDown
 } from "lucide-react"
 import { Customer } from "@/types"
-import { getTopMatches } from "@/lib/matching"
+import { getTopMatches, CompatibilityResult } from "@/lib/matching"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import { MatchSuggestionCard } from "./MatchSuggestionCard"
+import { EmailPreviewModal } from "./EmailPreviewModal"
 import mockData from "@/data/mock_data.json"
 
 interface MatchingRecommendationsProps {
   customer: Customer
 }
 
-interface AIAnalysis {
-  matchSummary: string;
-  strengths: string[];
-  concerns: string[];
+export interface AIMatchAnalysis {
+  compatibilitySummary: string;
+  expectationAlignment: string[];
+  keyStrengths: string[];
+  potentialConcerns: string[];
+  firstConversationTopics: string[];
+  matchmakerRecommendation: string;
+  introEmail: {
+    subject: string;
+    body: string;
+  };
 }
 
 export function MatchingRecommendations({ customer }: MatchingRecommendationsProps) {
-  const [aiAnalysis, setAiAnalysis] = useState<Record<string, AIAnalysis>>({})
+  const [aiAnalysis, setAiAnalysis] = useState<Record<string, AIMatchAnalysis>>({})
   const [loadingAI, setLoadingAI] = useState<Record<string, boolean>>({})
+  const [visibleCount, setVisibleCount] = useState(10)
+  
+  // Email Preview Modal State
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+  const [selectedMatch, setSelectedMatch] = useState<Customer | null>(null)
+  const [emailToPreview, setEmailToPreview] = useState<{ subject: string, body: string } | null>(null)
 
-  const recommendations = useMemo(() => {
+  const allRecommendations = useMemo(() => {
     const allProfiles = [...mockData.activeCustomers, ...mockData.matchPool] as Customer[];
     return getTopMatches(customer, allProfiles)
   }, [customer])
 
-  const fetchAIAnalysis = async (match: Customer, score: number) => {
+  const visibleRecommendations = useMemo(() => {
+    return allRecommendations.slice(0, visibleCount)
+  }, [allRecommendations, visibleCount])
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 10)
+  }
+
+  const fetchAIAnalysis = async (match: Customer & { matchDetails: CompatibilityResult }) => {
     if (aiAnalysis[match.id]) return;
 
     setLoadingAI(prev => ({ ...prev, [match.id]: true }))
 
     try {
-      const response = await fetch("/api/analyze-match", {
+      const response = await fetch("/api/ai-match-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer,
-          candidate: match,
-          score
+          customerProfile: customer,
+          candidateProfile: match,
+          compatibilityResult: match.matchDetails
         })
       })
 
@@ -53,13 +77,20 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
       setAiAnalysis(prev => ({ ...prev, [match.id]: data }))
     } catch (err: unknown) {
       console.error("AI Analysis failed:", err)
+      toast.error("Failed to generate AI insight")
     } finally {
       setLoadingAI(prev => ({ ...prev, [match.id]: false }))
     }
   }
 
-  const handleSendMatch = (matchName: string) => {
-    toast.success(`Match profile sent to ${matchName}`)
+  const handleSendMatch = (match: Customer, emailData?: { subject: string, body: string }) => {
+    if (emailData) {
+      setSelectedMatch(match)
+      setEmailToPreview(emailData)
+      setIsPreviewModalOpen(true)
+    } else {
+      toast.success(`Match profile sent to ${match.firstName}`)
+    }
   }
 
   const getMatchLabel = (score: number) => {
@@ -69,7 +100,7 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
     return "Potential Match"
   }
 
-  if (recommendations.length === 0) return null
+  if (allRecommendations.length === 0) return null
 
   return (
     <div className="space-y-6">
@@ -79,7 +110,7 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
             <SparklesIcon className="w-5 h-5 text-blue-600" />
             AI Match Suggestions
           </h2>
-          <p className="text-sm text-slate-500 font-medium">Top 10 ranked profiles for {customer.firstName}</p>
+          <p className="text-sm text-slate-500 font-medium">Showing {visibleRecommendations.length} of {allRecommendations.length} ranked profiles for {customer.firstName}</p>
         </div>
         <div className="hidden md:flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100">
           <BrainIcon className="w-4 h-4 text-blue-600" />
@@ -88,22 +119,35 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
       </div>
 
       <div className="grid grid-cols-1 gap-4">
-        {recommendations.map((match) => (
+        {visibleRecommendations.map((match) => (
           <MatchSuggestionCard 
             key={match.id}
             profile={match}
             matchDetails={match.matchDetails}
             matchLabel={getMatchLabel(match.matchDetails.score)}
-            aiExplanation={aiAnalysis[match.id]?.matchSummary || null}
+            aiAnalysis={aiAnalysis[match.id] || null}
             isAILoading={loadingAI[match.id]}
-            onSendMatch={(profile) => handleSendMatch(profile.firstName)}
+            onSendMatch={(profile, emailContent) => handleSendMatch(profile, emailContent)}
             onViewProfile={(profile) => {
               window.location.href = `/customer/${profile.id}`
             }}
-            onViewAIInsight={(profile) => fetchAIAnalysis(profile, match.matchDetails.score)}
+            onViewAIInsight={() => fetchAIAnalysis(match)}
           />
         ))}
       </div>
+
+      {visibleCount < allRecommendations.length && (
+        <div className="flex justify-center pt-4">
+          <Button 
+            variant="outline" 
+            onClick={handleLoadMore}
+            className="h-11 px-8 rounded-xl font-bold border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-all gap-2"
+          >
+            Load More Suggestions
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex gap-4 items-start shadow-sm">
         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
@@ -114,6 +158,20 @@ export function MatchingRecommendations({ customer }: MatchingRecommendationsPro
           Our hybrid engine combines mathematical compatibility scoring with advanced AI reasoning to prioritize candidates. Always review the full profile and previous meeting notes before proceeding with a recommendation.
         </div>
       </div>
+
+      {/* Email Preview Modal */}
+      {selectedMatch && emailToPreview && (
+        <EmailPreviewModal 
+          isOpen={isPreviewModalOpen}
+          onClose={() => {
+            setIsPreviewModalOpen(false)
+            setSelectedMatch(null)
+            setEmailToPreview(null)
+          }}
+          recipient={selectedMatch}
+          emailData={emailToPreview}
+        />
+      )}
     </div>
   )
 }

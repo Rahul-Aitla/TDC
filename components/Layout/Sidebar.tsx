@@ -49,8 +49,8 @@ export function Sidebar() {
   return (
     <div className="flex flex-col h-full bg-slate-50 border-r border-slate-200 w-64">
       <div className="p-6">
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Matchmaker</h1>
-        <p className="text-xs text-slate-500 font-medium">Portal v1.0</p>
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">TDC Matchmaker</h1>
+        <p className="text-xs text-slate-500 font-medium">Portal v0.1</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-1">
@@ -78,11 +78,11 @@ export function Sidebar() {
       <div className="p-4 mt-auto border-t border-slate-200">
         <div className="flex items-center gap-3 px-3 py-2">
           <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-            JD
+            DA
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">John Doe</p>
-            <p className="text-xs text-slate-500 truncate">Operator</p>
+            <p className="text-sm font-medium text-slate-900 truncate">Demo Account</p>
+            <p className="text-xs text-slate-500 truncate">Match Maker</p>
           </div>
         </div>
         <button

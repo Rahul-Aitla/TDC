@@ -81,7 +81,7 @@ export default function DashboardPage() {
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title="Total Customers" 
+          title="Assigned Customers" 
           value={customers.length.toString()} 
           change="+12.5%" 
           trend="up"

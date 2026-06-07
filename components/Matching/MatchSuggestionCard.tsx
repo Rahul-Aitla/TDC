@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { 
   MapPin, 
   Briefcase, 
   Calendar, 
   Send, 
-  Brain, 
   Sparkles,
   ChevronDown,
   ChevronUp,
@@ -20,23 +19,25 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CompatibilityResult } from "@/lib/matching"
+import { AIMatchAnalysis } from "./MatchingRecommendations"
+import { MatchAnalysisModal } from "./MatchAnalysisModal"
 
 interface MatchSuggestionCardProps {
   profile: Customer
   matchDetails: CompatibilityResult
   matchLabel: string
-  aiExplanation: string | null
+  aiAnalysis: AIMatchAnalysis | null
   isAILoading?: boolean
-  onSendMatch: (profile: Customer) => void
+  onSendMatch: (profile: Customer, emailData?: { subject: string, body: string }) => void
   onViewProfile: (profile: Customer) => void
-  onViewAIInsight: (profile: Customer) => void
+  onViewAIInsight: () => void
 }
 
 export function MatchSuggestionCard({
   profile,
   matchDetails,
   matchLabel,
-  aiExplanation,
+  aiAnalysis,
   isAILoading,
   onSendMatch,
   onViewProfile,
@@ -44,18 +45,6 @@ export function MatchSuggestionCard({
 }: MatchSuggestionCardProps) {
   const [showAIInsight, setShowAIInsight] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  const popoverRef = useRef<HTMLDivElement>(null)
-
-  // Close popover on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-        setShowAIInsight(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
 
   if (!matchDetails) {
     return null;
@@ -148,7 +137,7 @@ export function MatchSuggestionCard({
         {/* Section C: Tags */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap gap-[6px]">
-            {matchReasons.slice(0, 3).map((reason, idx) => (
+            {(showBreakdown ? matchReasons : matchReasons.slice(0, 3)).map((reason, idx) => (
               <Badge 
                 key={idx} 
                 variant="outline" 
@@ -160,7 +149,7 @@ export function MatchSuggestionCard({
                 {getShortLabel(reason)}
               </Badge>
             ))}
-            {matchReasons.length > 3 && (
+            {!showBreakdown && matchReasons.length > 3 && (
               <Badge variant="outline" className="bg-slate-50 text-slate-500 border-slate-200 text-[11px] font-bold py-[3px] px-[10px] rounded-full">
                 +{matchReasons.length - 3} more
               </Badge>
@@ -254,41 +243,24 @@ export function MatchSuggestionCard({
           size="sm" 
           className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-bold text-[12px] h-[32px] gap-1.5 px-3 rounded-lg"
           onClick={() => {
-            setShowAIInsight(!showAIInsight)
-            if (!showAIInsight) onViewAIInsight(profile)
+            setShowAIInsight(true)
+            onViewAIInsight()
           }}
         >
           <Sparkles className="w-3.5 h-3.5" />
           AI Insight
         </Button>
 
-        {/* AI Insight Popover (Above the button) */}
-        {showAIInsight && (
-          <div 
-            ref={popoverRef}
-            className="absolute bottom-full mb-[8px] right-0 w-[280px] bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-4 z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200"
-          >
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-50">
-              <Brain className="w-4 h-4 text-purple-600" />
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">AI Matching Analysis</span>
-            </div>
-            
-            {isAILoading && !aiExplanation ? (
-              <div className="space-y-2 py-1">
-                <div className="h-3 w-full bg-slate-100 rounded animate-pulse" />
-                <div className="h-3 w-3/4 bg-slate-100 rounded animate-pulse" />
-              </div>
-            ) : aiExplanation ? (
-              <p className="text-[12px] text-slate-600 leading-relaxed italic">
-                &quot;{aiExplanation}&quot;
-              </p>
-            ) : (
-              <p className="text-[12px] text-slate-400 italic">Click the button to generate insight...</p>
-            )}
-            
-            <div className="absolute -bottom-1.5 right-[40px] w-3 h-3 bg-white border-r border-b border-slate-100 rotate-45" />
-          </div>
-        )}
+        {/* AI Insight Modal */}
+        <MatchAnalysisModal 
+          isOpen={showAIInsight}
+          onClose={() => setShowAIInsight(false)}
+          profile={profile}
+          matchDetails={matchDetails}
+          aiAnalysis={aiAnalysis}
+          isAILoading={isAILoading}
+          onSendMatch={onSendMatch}
+        />
       </div>
     </div>
   )

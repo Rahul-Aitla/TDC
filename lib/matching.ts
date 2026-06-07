@@ -2,6 +2,7 @@ import { Customer } from "@/types";
 
 export interface CompatibilityResult {
   score: number;
+  confidenceLevel: string;
   futureGoals: number;
   lifestyle: number;
   family: number;
@@ -41,6 +42,7 @@ function parseIncome(incomeStr: string): number {
 export function calculateCompatibilityScore(user: Customer, candidate: Customer): CompatibilityResult {
   const result: CompatibilityResult = {
     score: 0,
+    confidenceLevel: "High",
     futureGoals: 0,
     lifestyle: 0,
     family: 0,
@@ -134,6 +136,7 @@ export function calculateCompatibilityScore(user: Customer, candidate: Customer)
 
     // Combine into total score
     result.score = result.futureGoals + result.lifestyle + result.family + result.career + result.location;
+    result.confidenceLevel = result.score > 75 ? "High" : result.score > 50 ? "Medium" : "Low";
 
   } else {
     // Female Matching Logic
@@ -230,6 +233,7 @@ export function calculateCompatibilityScore(user: Customer, candidate: Customer)
 
     // Combine into total score
     result.score = result.futureGoals + result.lifestyle + result.family + result.career + result.location;
+    result.confidenceLevel = result.score > 75 ? "High" : result.score > 50 ? "Medium" : "Low";
   }
 
   // Final score normalization
@@ -268,8 +272,7 @@ export function getTopMatches(user: Customer, pool: Customer[]): (Customer & { m
     matchDetails: calculateCompatibilityScore(user, candidate)
   }));
 
-  // Sort by score descending and take top 10
+  // Sort by score descending
   return rankedMatches
-    .sort((a, b) => b.matchDetails.score - a.matchDetails.score)
-    .slice(0, 10);
+    .sort((a, b) => b.matchDetails.score - a.matchDetails.score);
 }
