@@ -7,8 +7,5 @@
     }
   ],
   "framework": "nextjs",
-  "regions": ["sin1"],
-  "env": {
-    "GEMINI_API_KEY": "@gemini_api_key"
-  }
+  "regions": ["sin1"]
 }
