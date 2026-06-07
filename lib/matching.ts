@@ -138,26 +138,50 @@ export function calculateCompatibilityScore(user: Customer, candidate: Customer)
   } else {
     // Female Matching Logic
     
-    // 1. Future Goals (25 pts) - Kids, Relocation, Family Type
+    // 1. Future Goals (20 pts) - Kids, Relocation, Family Type
     let goalsPoints = 0;
-    if (user.wantKids === candidate.wantKids) goalsPoints += 15;
+    if (user.wantKids === candidate.wantKids) goalsPoints += 10;
     if (user.openToRelocate === candidate.openToRelocate) goalsPoints += 5;
     if (user.familyType === candidate.familyType) goalsPoints += 5;
     result.futureGoals = goalsPoints;
     if (user.wantKids === candidate.wantKids) result.strengths.push("Aligned on future family goals");
 
-    // 2. Values (20 pts)
+    // 2. Age & Height Preference (15 pts)
+    let preferencePoints = 0;
+    // Age: Prefer male older or same age (10 pts)
+    if (candidate.age >= user.age && candidate.age <= user.age + 7) {
+      preferencePoints += 10;
+      result.strengths.push("Age preference met (Male older/similar)");
+    } else if (candidate.age > user.age + 7) {
+      preferencePoints += 5;
+      result.concerns.push("Significant age gap (Male much older)");
+    } else {
+      result.concerns.push("Candidate is younger than preferred");
+    }
+
+    // Height: Prefer male taller (5 pts)
+    const userH = parseHeight(user.height);
+    const candH = parseHeight(candidate.height);
+    if (candH > userH) {
+      preferencePoints += 5;
+      result.strengths.push("Height preference met (Male taller)");
+    } else {
+      result.concerns.push("Candidate is shorter than preferred");
+    }
+    result.lifestyle = preferencePoints;
+
+    // 3. Values (20 pts)
     const valueTraits = ["Family-Oriented", "Career-Oriented", "Spiritual", "Traditional", "Modern"];
     const userAllText = (user.personalityTraits.join(" ") + " " + (user.partnerExpectations || "")).toLowerCase();
     const candidateAllText = (candidate.personalityTraits.join(" ") + " " + (candidate.partnerExpectations || "")).toLowerCase();
     
-    const matchingValues = valueTraits.filter(v => 
+    const matchingValues = valueTraits.filter((v: string) => 
       userAllText.includes(v.toLowerCase()) && 
       candidateAllText.includes(v.toLowerCase())
     );
     
-    const commonTraits = user.personalityTraits.filter(t => 
-      candidate.personalityTraits.some(ct => ct.toLowerCase() === t.toLowerCase())
+    const commonTraits = user.personalityTraits.filter((t: string) => 
+      candidate.personalityTraits.some((ct: string) => ct.toLowerCase() === t.toLowerCase())
     );
     
     result.lifestyle += Math.min(20, matchingValues.length * 8 + commonTraits.length * 4);
@@ -179,7 +203,7 @@ export function calculateCompatibilityScore(user: Customer, candidate: Customer)
     if (user.diet === candidate.diet) lifestylePoints += 5;
     if (user.smoking === candidate.smoking) lifestylePoints += 3;
     if (user.drinking === candidate.drinking) lifestylePoints += 3;
-    const commonHobbies = user.hobbies.filter(h => candidate.hobbies.includes(h));
+    const commonHobbies = user.hobbies.filter((h: string) => candidate.hobbies.includes(h));
     lifestylePoints += Math.min(4, commonHobbies.length * 2);
     result.lifestyle += lifestylePoints;
     if (lifestylePoints >= 10) result.strengths.push("Compatible daily lifestyle");
@@ -199,7 +223,7 @@ export function calculateCompatibilityScore(user: Customer, candidate: Customer)
     let famPoints = 0;
     if (user.religion === candidate.religion) famPoints += 7;
     if (user.familyType === candidate.familyType) famPoints += 4;
-    const commonLang = user.languages.filter(l => candidate.languages.includes(l));
+    const commonLang = user.languages.filter((l: string) => candidate.languages.includes(l));
     if (commonLang.length > 0) famPoints += 4;
     result.family = famPoints;
     if (famPoints >= 10) result.strengths.push("Strong cultural & family alignment");

@@ -96,6 +96,8 @@ export function MatchSuggestionCard({
     if (r.includes("dietary") || r.includes("diet")) return "Same Diet"
     if (r.includes("smoking")) return "Same Habits"
     if (r.includes("perfect cultural match")) return "Cultural Match"
+    if (r.includes("age preference")) return "Age Match"
+    if (r.includes("height preference")) return "Height Match"
     return reason // fallback
   }
 
