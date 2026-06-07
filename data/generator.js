@@ -122,6 +122,7 @@ function generateCustomer(id, forcedGender = null) {
 }
 
 // 1. Load existing data
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
 const path = require('path');
 const dataPath = path.join(__dirname, 'mock_data.json');

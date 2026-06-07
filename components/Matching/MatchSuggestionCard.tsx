@@ -46,13 +46,6 @@ export function MatchSuggestionCard({
   const [showBreakdown, setShowBreakdown] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
 
-  if (!matchDetails) {
-    return null;
-  }
-
-  const matchScore = matchDetails.score;
-  const matchReasons = matchDetails.strengths || [];
-
   // Close popover on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,6 +56,13 @@ export function MatchSuggestionCard({
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  if (!matchDetails) {
+    return null;
+  }
+
+  const matchScore = matchDetails.score;
+  const matchReasons = matchDetails.strengths || [];
 
   const getScoreColors = (score: number) => {
     if (score >= 80) return { bg: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-500", light: "bg-emerald-50" }
